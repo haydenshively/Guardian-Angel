@@ -1,12 +1,24 @@
-import numpy as np
+if __name__ == '__main__':
+    import numpy as np
+    import json
+    import lstm
 
-dir_in = '_E_Vectors/'
+    dir_in = '_E_Vectors/'
+    sequences = np.load(dir_in + 'X.npy')
+    sentiment = np.load(dir_in + 'Y.npy')
+    embedding_matrix = np.load(dir_in + 'EmbeddingMatrix.npy')
 
-X_threat = np.load(dir_in + '1.npy')
-X_chill = np.load(dir_in + '2.npy')
+    with open(dir_in + 'Params.json') as param_file:
+        params = json.load(param_file)
+        vocab_size = params['Vocab Size']
+        vector_dims = params['Vector Dims']
+        sequence_length = params['Sequence Length']
 
-Y_threat = np.ones((X_threat.shape[0]), dtype = 'float32')
-Y_chill = np.ones((X_chill.shape[0]), dtype = 'float32')
+    basic_lstm = lstm.Basic(vector_dims, embedding_matrix, sequence_length, vocab_size)
 
-X = np.vstack((X_threat, X_chill))
-Y = np.vstack((Y_threat, Y_chill))
+    trainer = lstm.Trainer()
+    trainer.input = sequences
+    trainer.output = sentiment
+    trainer.train(basic_lstm.model)
+
+    basic_lstm.save_to_file('models/basic_lstm.h5')
