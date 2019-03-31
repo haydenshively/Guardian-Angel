@@ -1,11 +1,12 @@
 """https://doi.org/10.1016/j.procs.2015.02.112"""
 """https://arxiv.org/pdf/1811.08065.pdf"""
 """https://www.liip.ch/en/blog/sentiment-detection-with-keras-word-embeddings-and-lstm-deep-learning-networks"""
+"""https://machinelearningmastery.com/use-word-embedding-layers-deep-learning-keras/"""
 
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Dense, Flatten
+from keras.layers import LSTM, Embedding
 
 import numpy as np
 
@@ -27,10 +28,10 @@ class Basic(object):
         self.sequence_length = sequence_length
         self.vocab_size = vocab_size
 
-        self.model = Basic._architecture()
+        self.model = self._architecture()
         self.learning_style = learning_style
 
-    def _architecture():
+    def _architecture(self):
         archit = Sequential()
 
         archit.add(Embedding(
@@ -39,7 +40,7 @@ class Basic(object):
             weights = [self.embedding_matrix],
             input_length = self.sequence_length,
             trainable = False))
-        archit.add(LSTM(100))
+        archit.add(LSTM(50))
         archit.add(Dense(1, activation = 'sigmoid'))
 
         return archit
@@ -62,6 +63,6 @@ class Trainer(object):
         self.input = None
         self.output = None
 
-    def train(self, model, epochs = 50):
+    def train(self, model, epochs = 50, batch_size = 10):
         print(model.summary())
-        model.fit(self.input, self.output, epochs = epochs, verbose = 1, shuffle = True)
+        model.fit(self.input, self.output, epochs = epochs, batch_size = batch_size, verbose = 1, shuffle = True)
