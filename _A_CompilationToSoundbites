@@ -1,0 +1,2 @@
+ffmpeg -i _A_1Compilation/1.wav -f segment -segment_time 59 -c copy _B_100ishSoundbites/bite%03d.wav
+ffmpeg -i _A_1Compilation/2.wav -f segment -segment_time 35 -c copy _B_100ishSoundbites/bite2%02d.wav

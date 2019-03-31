@@ -1,3 +1,9 @@
+_A_1Compilation
+_B_100ishSoundbites
+_C_100ishGCPCompat
+_D_1Corpus
+_E_Vectors
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
