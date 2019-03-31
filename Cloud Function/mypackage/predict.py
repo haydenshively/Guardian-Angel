@@ -1,17 +1,23 @@
-def predict(string_list):
-    from keras import models
-    lstm = models.load_model('models/basic_lstm.h5')
+from keras import models
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+import pickle
 
-    import pickle
-    with open('models/Tokenizer.pickle', 'rb') as tokenizer_file:
-        tokenizer = pickle.load(tokenizer_file)
+lstm = models.load_model('mypackage/lstm.h5')
+with open('mypackage/tokenizer.pickle', 'rb') as tokenizer_file:
+    tokenizer = pickle.load(tokenizer_file)
 
-    from keras.preprocessing.text import Tokenizer
-    from keras.preprocessing.sequence import pad_sequences
+def batch(string_list):
+    global lstm, tokenizer
     text_encoded = tokenizer.texts_to_sequences(string_list)
     text_padded = pad_sequences(text_encoded, maxlen = 59, padding = 'post')
-
     return lstm.predict(text_padded)
+
+def single(string):
+    global lstm, tokenizer
+    text_encoded = tokenizer.texts_to_sequences([string])
+    text_padded = pad_sequences(text_encoded, maxlen = 59, padding = 'post')
+    return lstm.predict(text_padded)[0][0]
 
 if __name__ == '__main__':
     text = [
@@ -27,5 +33,5 @@ if __name__ == '__main__':
     """,
     ]
 
-    result = predict(text)
+    result = batch(text)
     print(result)
