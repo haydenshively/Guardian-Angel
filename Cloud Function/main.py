@@ -44,6 +44,10 @@ def predict_threat(request):
         return str(-1.0)
     text.replace('+', ' ')
 
+    # improve prediction by repeating short sequences
+    if len(text.split()) < 15:
+        text = (text + ' ')*3
+
     return str(predict.single(text))
 
 # def hello_content(request):
