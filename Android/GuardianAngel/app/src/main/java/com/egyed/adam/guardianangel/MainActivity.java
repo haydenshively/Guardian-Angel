@@ -19,9 +19,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     // View references
     private TextView mStatus;
     private TextView mText;
+
+    int numHighRisk = 0;
 
     private SpeechService mSpeechService;
 
@@ -117,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         checkSafety(words);
 
-                                        sb.setLength(0);
+                                        sb = new StringBuilder();
                                     }
 
                                 } else {
@@ -310,17 +314,15 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder("http://us-central1-guardian-angel-21062019.cloudfunctions.net/predict_threat?text=");
 
 
-        for (int i = 0; i < words.size(); i++) {
+        for (int i = 0; i < words.size() && i < 30; i++) {
 
             String word = words.get(i);
-            if (word.contains("\'")) continue;
-            word = word.replaceAll(".", "+");
-            if (word.contains("\\")) continue;
-            if (word.contains("/")) continue;
-            stringBuilder.append(words).append('+');
+            stringBuilder.append(word).append('+');
         }
 
-        String url =stringBuilder.toString();
+        String url = stringBuilder.toString();
+
+        Log.wtf("URL",url);
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -330,6 +332,14 @@ public class MainActivity extends AppCompatActivity {
                         // Display the first 500 characters of the response string.
 
                         float score = Float.valueOf(response);
+
+                        if (score > 0.91) {
+                            numHighRisk++;
+                            if (numHighRisk > 3) {
+                                sendTextAlert();
+                                numHighRisk = 0;
+                            }
+                        }
 
                         String percentDisplay = String.valueOf(response.charAt(2));
                         percentDisplay += response.charAt(3);
@@ -368,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                ((TextView) findViewById(R.id.functionStatus)).setText(error.toString());
+                //((TextView) findViewById(R.id.functionStatus)).setText(error.toString());
                 error.printStackTrace();
             }
         });
@@ -442,5 +452,34 @@ public class MainActivity extends AppCompatActivity {
 
     public static String rgbToHex(final int r, final int g, final int b) {
         return String.format("#%02x%02x%02x", r, g, b);
+    }
+
+    private void sendTextAlert() {
+        EditText editText = (EditText) findViewById(R.id.phoneNum);
+        phonenumber = editText.getText().toString();
+
+
+        Toast.makeText(getApplicationContext(),"Sending Emergency SMS!",
+                Toast.LENGTH_SHORT).show();
+
+
+        message = "Alert! I am potentially in danger.";
+
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.SEND_SMS)) {
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        0);
+            }
+        }
+
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage("+1" + phonenumber, null, message, null, null);
+
     }
 }
