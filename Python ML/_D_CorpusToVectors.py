@@ -78,6 +78,10 @@ if __name__ == '__main__':
     with open(dir_out + 'Params.json', 'w') as param_file:
         json.dump(params, param_file)
 
+    import pickle
+    with open('models/' + 'Tokenizer.pickle', 'wb') as tokenizer_file:
+        pickle.dump(tokenizer, tokenizer_file, protocol = pickle.HIGHEST_PROTOCOL)
+
 
 
     """FIRST CORPUS
