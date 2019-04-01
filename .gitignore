@@ -108,3 +108,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+Python ML/glove.twitter.27B.50d.txt
